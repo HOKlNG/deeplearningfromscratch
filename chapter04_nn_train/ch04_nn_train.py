@@ -42,12 +42,43 @@ def numeriacl_gradient(f,x):
 
         #f(x-h)
         x[idx] = tmp_val - h
-        fxh2 = f(X)
+        fxh2 = f(x)
 
         grad[idx] = (fxh1 - fxh2) / (2*h)
         x[idx] = tmp_val
 
     return grad
+
+#경사법
+def gradient_descent(f, init_x, lr=0.001, step_num = 100):
+    x = init_x
+
+    for i in range(step_num):
+        grad = numerical_gradient(f,x)
+        x -= lr*grad
+    return x
+
+#sorft max apply overflow problem
+def softmax(a):
+    c = np.max(a)
+    exp_a = np.exp(a-c)
+    sum_exp_a = np.sum(exp_a)
+    y = exp_a / sum_exp_a
+    return y
+
+class simpleNet:
+
+    def __init__(self):
+        self.W = np.random.randn(2,3) #정규분포로 초기화
+
+    def predict(self, x):
+        return np.dot(x, self.W)
+
+    def loss(self, x, t):
+        z = self.predict(x)
+        y = softmax(z)
+        loss = cross_entropy_error(y, t)
+        return loss
 
 if __name__ == '__main__':
     t = [0,0,1,0,0,0,0,0,0,0]
@@ -81,3 +112,25 @@ if __name__ == '__main__':
     print('편미분')
     print(numerical_diff(function_tmp1,3.0))
     print(numerical_diff(function_tmp2,4.0))
+
+    #신경망을예로 기울기 구하기
+    print('-----------------------------------------')
+    net = simpleNet()
+    print(net.W)
+    x=np.array([0.6, 0.9])
+    p = net.predict(x)
+    print('print p')
+    print(p)
+    np.argmax(p)
+
+    t = np.array([0,0,1]) #정답레이블
+    print(net.loss(x,t))
+
+    print('-----------------------------------------')
+    print('기울기')
+
+
+    f = lambda w: net.loss(x,t)
+    #힝 왜 안돼
+    dW = numeriacl_gradient(f, net.W)
+    print(dW)
